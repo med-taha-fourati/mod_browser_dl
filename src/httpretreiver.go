@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
@@ -45,7 +44,7 @@ func retrieve(query string, page_no int) ([]string, []string) {
 	if err != nil {
 		fmt.Printf("The http request failed with error: %s\n", err)
 	} else {
-		data, _ := ioutil.ReadAll(response.Body)
+		data, _ := io.ReadAll(response.Body)
     
     if strings.Contains(string(data), "Sorry, no results were found.") {
       fmt.Println("Sorry, no results were found.")
@@ -139,18 +138,18 @@ func helperFunc(query *string, selection *int, codes *[]string, names *[]string)
   }
 }
 
-func main() {
-	var query string
-  var selection int
-  var codes []string
-  var names []string
+// func main() {
+// 	var query string
+//   var selection int
+//   var codes []string
+//   var names []string
 
-  for {
-		helperFunc(&query, &selection, &codes, &names)
-		if (codes != nil && names != nil) { break; }
-	}
-	downloadFile(names[selection], "https://api.modarchive.org/downloads.php?moduleid="+codes[selection])
-}
+//   for {
+// 		helperFunc(&query, &selection, &codes, &names)
+// 		if (codes != nil && names != nil) { break; }
+// 	}
+// 	downloadFile(names[selection], "https://api.modarchive.org/downloads.php?moduleid="+codes[selection])
+// }
 
 func downloadFile(filepath string, url string) (err error) {
 	dirpath := "downloads/"
