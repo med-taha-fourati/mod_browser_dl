@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 const serverPort = 3000
@@ -28,17 +29,45 @@ func BrowseFunction(w http.ResponseWriter, r *http.Request) {
 	index_int, err := strconv.Atoi(index)
 	if err != nil {
 		fmt.Fprintf(w, "Invalid Index, Defaulting to 1\n");
+		http.Error(w, "Bad request\n", http.StatusBadRequest)
 	}
 	codes, names = retrieve(word, index_int)
 
 	if (len(codes) < 1) {
 		fmt.Fprintf(w, "Sorry, no results were found\n")
+		http.Error(w, "Bad request\n", http.StatusBadRequest)
 		return
 	}
 
 	for i, code := range codes {
 		fmt.Fprintf(w, "%s | %s\n", code, names[i])
 	}
+}
+
+func DownloadFunction(w http.ResponseWriter, r *http.Request) {
+	if (r.Method != http.MethodPost) {
+		fmt.Fprintf(w, "POST method allowed only\n")
+		http.Error(w, "Method Not allowed\n", http.StatusMethodNotAllowed)
+		return
+	}
+
+	parts := strings.Split(r.URL.Path, "/");
+	if (len(parts) != 3 || parts[2] == "") {
+		fmt.Fprintf(w, "Nothing has been given\n")
+		http.Error(w, "Bad Request\n", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(parts[2])
+	fmt.Fprintf(w, "Gotten id: %d\n", id)
+
+	if err != nil {
+		fmt.Fprintf(w, "Invalid ID\n")
+		http.Error(w, "Bad request\n", http.StatusBadRequest)
+		return
+	}
+	fmt.Fprintf(w, "Downloading in progress... Check your server console\n")
+	
 }
 
 func main() {
@@ -53,6 +82,7 @@ func main() {
 		})
 		
 		mux.HandleFunc("/browse", BrowseFunction)
+		mux.HandleFunc("/download", DownloadFunction)
 
 		server := http.Server {
 				Addr: fmt.Sprintf(":%d", serverPort),
