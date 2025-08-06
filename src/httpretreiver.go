@@ -70,6 +70,14 @@ func lookupFileName(query_id string) {
     return
   }
   fmt.Println(response)
+  data, _ := io.ReadAll(response.Body)
+
+  r := regexp.MustCompile(`<title>`)
+	matches := r.FindAllString(string(data), -1)
+  for _, r := range matches {
+    println(r)
+    //TODO: fetch the file name and return it
+  }
 }
 
 func helperFunc(query *string, selection *int, codes *[]string, names *[]string) {
@@ -150,6 +158,35 @@ func helperFunc(query *string, selection *int, codes *[]string, names *[]string)
 // 	}
 // 	downloadFile(names[selection], "https://api.modarchive.org/downloads.php?moduleid="+codes[selection])
 // }
+
+func indexCodeLookup(code int, selection []string) (int) {
+  for i, _code := range selection {
+    int_code, err := strconv.Atoi(_code)
+    if err != nil {
+      return -2
+    }
+    if (int_code == code) {
+      return i
+    } else {
+      return -1
+    }
+  }
+  return -3
+}
+
+func automaticDepaginator(query string) ([]string, []string) {
+  var totalCodes []string
+  var totalNames []string
+  page := 1
+  for {
+    code, name := retrieve(query, page)
+    if (code == nil || name == nil) { break; }
+    totalCodes = append(totalCodes, code...)
+    totalNames = append(totalNames, name...)
+    page++;
+  }
+  return totalCodes, totalNames
+}
 
 func downloadFile(filepath string, url string) (err error) {
 	dirpath := "downloads/"

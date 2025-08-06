@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 const serverPort = 3000
@@ -31,7 +30,8 @@ func BrowseFunction(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Invalid Index, Defaulting to 1\n");
 		http.Error(w, "Bad request\n", http.StatusBadRequest)
 	}
-	codes, names = retrieve(word, index_int)
+	print(index_int)
+	codes, names = automaticDepaginator(word)
 
 	if (len(codes) < 1) {
 		fmt.Fprintf(w, "Sorry, no results were found\n")
@@ -51,14 +51,10 @@ func DownloadFunction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	parts := strings.Split(r.URL.Path, "/");
-	if (len(parts) != 3 || parts[2] == "") {
-		fmt.Fprintf(w, "Nothing has been given\n")
-		http.Error(w, "Bad Request\n", http.StatusBadRequest)
-		return
-	}
+	search_query := r.URL.Query()
+	word := search_query.Get("search")
 
-	id, err := strconv.Atoi(parts[2])
+	id, err := strconv.Atoi(word)
 	fmt.Fprintf(w, "Gotten id: %d\n", id)
 
 	if err != nil {
@@ -66,6 +62,10 @@ func DownloadFunction(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request\n", http.StatusBadRequest)
 		return
 	}
+
+	x := word
+	lookupFileName(x);
+
 	fmt.Fprintf(w, "Downloading in progress... Check your server console\n")
 	
 }
