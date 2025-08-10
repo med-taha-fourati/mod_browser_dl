@@ -64,10 +64,11 @@ func DownloadFunction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	x := word
-	lookupFileName(x);
-
+	result_name, url_name := lookupFileName(x);
+	//fmt.Println(result_name, url_name)
 	fmt.Fprintf(w, "Downloading in progress... Check your server console\n")
-	
+
+	downloadFile(result_name, url_name)
 }
 
 func main() {

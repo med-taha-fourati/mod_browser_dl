@@ -64,20 +64,28 @@ func retrieve(query string, page_no int) ([]string, []string) {
   return query_codes, query_names
 }
 
-func lookupFileName(query_id string) {
+func lookupFileName(query_id string) (string, string) {
   response, err := http.Get("https://modarchive.org/index.php?request=view_by_moduleid&query="+query_id)
   if err != nil {
-    return
+    return "Undefined error: ", err.Error()
   }
-  fmt.Println(response)
+  //fmt.Println(response)
   data, _ := io.ReadAll(response.Body)
 
-  r := regexp.MustCompile(`<title>`)
+  //println(string(data))
+  r := regexp.MustCompile(`<a href="https://api.modarchive.*</a>`)
 	matches := r.FindAllString(string(data), -1)
-  for _, r := range matches {
-    println(r)
-    //TODO: fetch the file name and return it
-  }
+  result := matches[0]
+  filtered := result[strings.Index(result, `#`)+1:strings.Index(result, "\">")]
+  filtered_url := result[strings.Index(result, `https://api.modarchive.org/downloads.php?moduleid=`):strings.Index(result, "\">")]
+
+  return filtered, filtered_url
+  // for _, r := range matches {
+  //   //println(r)
+  //   //TODO: fetch the file name and return it
+  //   filtered := r[strings.Index(r, `#`)+1:strings.Index(r, "\">")]
+  //   println(filtered)
+  // }
 }
 
 func helperFunc(query *string, selection *int, codes *[]string, names *[]string) {
