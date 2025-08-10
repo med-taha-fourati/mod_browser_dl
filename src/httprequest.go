@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"encoding/json"
 )
 
 const serverPort = 3000
@@ -15,22 +16,21 @@ Usage:
 - POST /download/{id} downloads the thing
 */
 
+func ModFileDetails(w http.ResponseWriter, r *http.Request) {
+	//TODO: fetch the metadata of the song
+	
+}
+
 func BrowseFunction(w http.ResponseWriter, r *http.Request) {
 	search_query := r.URL.Query()
-	fmt.Fprintf(w, "Query params: %v\n", search_query)
+	//fmt.Fprintf(w, "Query params: %v\n", search_query)
 
 	word := search_query.Get("search")
-	index := search_query.Get("index")
-	fmt.Fprintf(w, "Search: %s %s\n", word, index)
-	  
+	//fmt.Fprintf(w, "Search: %s %s\n", word, index)
+
 	var codes []string
   	var names []string
-	index_int, err := strconv.Atoi(index)
-	if err != nil {
-		fmt.Fprintf(w, "Invalid Index, Defaulting to 1\n");
-		http.Error(w, "Bad request\n", http.StatusBadRequest)
-	}
-	print(index_int)
+		
 	codes, names = automaticDepaginator(word)
 
 	if (len(codes) < 1) {
@@ -39,9 +39,32 @@ func BrowseFunction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+
+	jsonData := []map[string]interface{}{}
+
 	for i, code := range codes {
-		fmt.Fprintf(w, "%s | %s\n", code, names[i])
+		jsonData = append(jsonData, map[string]interface{}{
+			"name": names[i],
+			"code": code,
+		})
+		//fmt.Fprintf(w, "%s | %s\n", code, names[i])
 	}
+
+	jsonHeader := map[string]interface{}{
+		"result": jsonData,
+	}
+
+	jsonString, err := json.Marshal(jsonHeader)
+
+	if err != nil {
+		fmt.Fprintf(w, "Unknown error occured\n")
+		http.Error(w, "Internal Server Error\n", http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "%s", string(jsonString))
+
 }
 
 func DownloadFunction(w http.ResponseWriter, r *http.Request) {
