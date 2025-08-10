@@ -18,7 +18,7 @@ Usage:
 
 func ModFileDetails(w http.ResponseWriter, r *http.Request) {
 	//TODO: fetch the metadata of the song
-	
+
 }
 
 func BrowseFunction(w http.ResponseWriter, r *http.Request) {
@@ -26,12 +26,18 @@ func BrowseFunction(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, "Query params: %v\n", search_query)
 
 	word := search_query.Get("search")
+	index := search_query.Get("index")
 	//fmt.Fprintf(w, "Search: %s %s\n", word, index)
 
 	var codes []string
   	var names []string
 		
-	codes, names = automaticDepaginator(word)
+	if (index == "") {
+		codes, names = automaticDepaginator(word)
+	} else {
+		indexInt, _ := strconv.Atoi(index)
+		codes, names = retrieve(word, indexInt)
+	}
 
 	if (len(codes) < 1) {
 		fmt.Fprintf(w, "Sorry, no results were found\n")
@@ -52,6 +58,8 @@ func BrowseFunction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonHeader := map[string]interface{}{
+		"index": index,
+		"query": word,
 		"result": jsonData,
 	}
 

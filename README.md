@@ -7,7 +7,7 @@ This is a simple Go HTTP server/scraper for browsing and downloading module file
 - **Download modules:** Download a module file by its ID.
 
 ## Endpoints
-- `GET /browse?search=keyword` — Returns a JSON list of matching songs/modules.
+- `GET /browse?search=keyword&index=number` — Returns a JSON list of matching songs/modules. (**Optional** with index filtering)
 - `POST /download?search={id}` — Downloads the module file with the given ID.
 
 ## How to Run
